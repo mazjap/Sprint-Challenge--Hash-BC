@@ -26,7 +26,11 @@ def proof_of_work(last_proof):
     old_hash = sha(last_proof)
     hash_prime = sha(proof)
     while valid_proof(old_hash, hash_prime) is False:
-        proof = random_int()
+        if proof % 50_000_000 is 0:
+            print("changing it up")
+            old_hash = sha(get_block().get('proof'))
+        # proof = random_int()
+        proof += 1
         hash_prime = sha(proof)
     return proof
 
@@ -48,11 +52,13 @@ def valid_proof(last_hash, hash_prime):
 
     IE:  last_hash: ...AE9123456, new hash 123456E88...
     """
-    
-    if last_hash[-6:] is hash_prime[:6]:
+    if last_hash[-6:] == hash_prime[:6]:
         return True
     return False
 
+def get_block():
+    r = requests.get(url="https://lambda-coin.herokuapp.com/api" + "/last_proof")
+    return r.json()
 
 if __name__ == '__main__':
     # What node are we interacting with?
@@ -75,8 +81,7 @@ if __name__ == '__main__':
     # Run forever until interrupted
     while True:
         # Get the last proof from the server
-        r = requests.get(url=node + "/last_proof")
-        data = r.json()
+        data = get_block()
         new_proof = proof_of_work(data.get('proof'))
 
         post_data = {"proof": new_proof,
