@@ -21,16 +21,26 @@ def proof_of_work(last_proof):
     """
 
     start = timer()
-
     print("Searching for next proof")
-    proof = 0
-    #  TODO: Your code here
+    proof = random_int()
+    old_hash = sha(last_proof)
+    hash_prime = sha(proof)
+    while valid_proof(old_hash, hash_prime) is False:
+        proof = random_int()
+        hash_prime = sha(proof)
+    return proof
+
 
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
 
+def random_int():
+    return random.randint(-sys.maxsize, sys.maxsize)
 
-def valid_proof(last_hash, proof):
+def sha(value):
+    return hashlib.sha256(str(value).encode()).hexdigest()
+
+def valid_proof(last_hash, hash_prime):
     """
     Validates the Proof:  Multi-ouroborus:  Do the last six characters of
     the hash of the last proof match the first six characters of the hash
@@ -38,9 +48,10 @@ def valid_proof(last_hash, proof):
 
     IE:  last_hash: ...AE9123456, new hash 123456E88...
     """
-
-    # TODO: Your code here!
-    pass
+    
+    if last_hash[-6:] is hash_prime[:6]:
+        return True
+    return False
 
 
 if __name__ == '__main__':
